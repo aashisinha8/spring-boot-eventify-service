@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eventify</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .card {
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            width: 220px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+        #details {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Eventify - Smart Event Management</h1>
+<p>Manage and participate in events seamlessly</p>
+
+<div class="card" onclick="showRole('admin')">
+    <h3>Admin</h3>
+    <p>Platform Controller</p>
+</div>
+
+<div class="card" onclick="showRole('organizer')">
+    <h3>Organizer</h3>
+    <p>Create & Manage Events</p>
+</div>
+
+<div class="card" onclick="showRole('participant')">
+    <h3>Participant</h3>
+    <p>Register & Attend Events</p>
+</div>
+
+<div id="details"></div>
+
+<script>
+    function showRole(role) {
+        let text = "";
+        if(role === "admin") {
+            text = "Admin can manage users, events, and monitor the system.";
+        }
+        else if(role === "organizer") {
+            text = "Organizer can create events, update event details, and view participants.";
+        }
+        else if(role === "participant") {
+            text = "Participant can browse events and register for them.";
+        }
+        document.getElementById("details").innerHTML = text;
+    }
+</script>
+
+</body>
+</html>
