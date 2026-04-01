@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+</head>
+
+<body>
+
+<h2>Eventify Dashboard</h2>
+
+<button onclick="getUsers()">Get Users (ADMIN)</button>
+<button onclick="createEvent()">Create Event (ORGANIZER)</button>
+<button onclick="getEvents()">View Events (ALL)</button>
+
+<script>
+	if (!localStorage.getItem("jwt")) {
+		    window.location.href = "login.html";
+		}
+
+function getToken(){
+    return localStorage.getItem("jwt");
+}
+
+async function getUsers(){
+
+    const response = await fetch("/users", {
+        method: "GET",
+        headers:{
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    if(response.status === 200){
+        alert("✅ ADMIN access granted");
+    } else if(response.status === 403){
+        alert("❌ Access denied (Only ADMIN allowed)");
+    } else {
+        alert("⚠️ Error: " + response.status);
+    }
+}
+async function createEvent(){
+
+    const response = await fetch("/events/create", {
+        method: "POST",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization": "Bearer " + getToken()
+        },
+        body: JSON.stringify({
+            name:"Test Event",
+            location:"Bangalore"
+        })
+    });
+
+    if(response.status === 200){
+        alert("✅ ORGANIZER access granted");
+    } else if(response.status === 403){
+        alert("❌ Access denied (Only ORGANIZER allowed)");
+    } else {
+        alert("⚠️ Error: " + response.status);
+    }
+}
+async function getEvents(){
+
+    const response = await fetch("/events", {
+        method: "GET",
+        headers:{
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    if(response.status === 200){
+        alert("✅ Accessible to all roles");
+    } else if(response.status === 403){
+        alert("❌ Access denied");
+    } else {
+        alert("⚠️ Error: " + response.status);
+    }
+}
+
+</script>
+
+</body>
+</html>

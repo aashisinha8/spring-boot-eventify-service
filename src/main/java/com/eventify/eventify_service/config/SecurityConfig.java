@@ -13,37 +13,66 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 public class SecurityConfig {
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-	    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-	}
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-	    .csrf(csrf -> csrf.disable())
-	    .sessionManagement(session ->
-	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-	    )
-	    .authorizeHttpRequests(auth -> auth
-	        .requestMatchers("/auth/login").permitAll()
-	        .requestMatchers("/health").permitAll()
-	        .anyRequest().authenticated()
-	    )
-	    .formLogin(form -> form.disable())
-	    .httpBasic(basic -> basic.disable())
-	    .addFilterBefore(jwtAuthenticationFilter,
-	            UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		return http.build();
+        http
+            // 1️ Disable CSRF (because we use JWT, not session cookies)
+            .csrf(csrf -> csrf.disable())
 
-	}
+            // 2️ Make app stateless (no sessions)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // 3️ Authorization rules
+            .authorizeHttpRequests(auth -> auth
+
+            	    // Public resources
+            	    .requestMatchers(
+            	            "/", 
+            	            "/index.html", 
+            	            "/css/**", 
+            	            "/js/**", 
+            	            "/login.html",
+            	            "/register.html",
+            	            "/images/**"
+            	    ).permitAll()
+
+            	    .requestMatchers("/auth/login", "/auth/register", "/health").permitAll()
+
+            	    // 🔐 ROLE BASED ACCESS
+            	    .requestMatchers("/users/**").hasRole("ADMIN")
+
+            	    .requestMatchers("/events/create").hasRole("ORGANIZER")
+
+            	    .requestMatchers("/events/**")
+            	        .hasAnyRole("ADMIN", "ORGANIZER", "PARTICIPANT")
+
+            	    .anyRequest().authenticated()
+            	
+            )
+
+            // 4️⃣ Disable default login forms
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+
+            // 5️⃣ Add JWT filter before default auth filter
+            .addFilterBefore(jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
