@@ -1,6 +1,11 @@
 # Eventify - Smart Event Management System
 
 Spring Boot backend service for managing events and users with role-based access.
+Features:
+- JWT Authentication
+- Role-Based Access Control (ADMIN, ORGANIZER, PARTICIPANT)
+- Secure REST APIs
+- Interactive UI (Login, Register, Dashboard)
 
 ## Tech Stack
 - Java 17
