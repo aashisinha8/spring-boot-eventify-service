@@ -4,6 +4,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.eventify.eventify_service.dto.UserDTORequest;
+import com.eventify.eventify_service.model.Role;
 import com.eventify.eventify_service.model.User;
 import com.eventify.eventify_service.repository.UserRepository;
 @Service
@@ -32,17 +35,17 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public User updateUser(String id, UserDTORequest dto) {
+    	User existingUser = getUserById(id);
 
-    public User updateUser(String id, User updatedUser) {
-        User existingUser = getUserById(id);
+        existingUser.setName(dto.getName());
+        existingUser.setEmail(dto.getEmail());
 
-        existingUser.setName(updatedUser.getName());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setRole(updatedUser.getRole());
-        existingUser.setPassword(
-        	    passwordEncoder.encode(updatedUser.getPassword())
-        	);
+        // Role conversion (IMPORTANT)
+        existingUser.setRole(Role.valueOf(dto.getRole().toUpperCase()));
 
+        // Encode password
+        existingUser.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         return userRepository.save(existingUser);
     }

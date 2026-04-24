@@ -3,8 +3,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.eventify.eventify_service.dto.UserDTORequest;
 import com.eventify.eventify_service.model.User;
 import com.eventify.eventify_service.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -27,11 +31,11 @@ public class UserController {
     public User getById(@PathVariable String id) {
         return userService.getUserById(id);
     }
-
     @PutMapping("/{id}")
     public User update(@PathVariable String id,
-                       @RequestBody User user) {
-        return userService.updateUser(id, user);
+                       @Valid @RequestBody UserDTORequest dto) {
+
+        return userService.updateUser(id, dto);
     }
 
     @DeleteMapping("/{id}")

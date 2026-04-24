@@ -34,7 +34,7 @@ public class SecurityConfig {
 
             // 3️ Authorization rules
             .authorizeHttpRequests(auth -> auth
-
+            		 .requestMatchers("/auth/**").permitAll()
             	    // Public resources
             	    .requestMatchers(
             	            "/", 
@@ -45,14 +45,8 @@ public class SecurityConfig {
             	            "/register.html",
             	            "/images/**"
             	    ).permitAll()
-
-            	    .requestMatchers("/auth/login", "/auth/register", "/health").permitAll()
-
-            	    // 🔐 ROLE BASED ACCESS
             	    .requestMatchers("/users/**").hasRole("ADMIN")
-
             	    .requestMatchers("/events/create").hasRole("ORGANIZER")
-
             	    .requestMatchers("/events/**")
             	        .hasAnyRole("ADMIN", "ORGANIZER", "PARTICIPANT")
 
