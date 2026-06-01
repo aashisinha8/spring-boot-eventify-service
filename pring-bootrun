@@ -1,0 +1,230 @@
+[1mdiff --git a/src/main/java/com/eventify/eventify_service/config/JwtAuthenticationFilter.java b/src/main/java/com/eventify/eventify_service/config/JwtAuthenticationFilter.java[m
+[1mindex c5517fd..848d951 100644[m
+[1m--- a/src/main/java/com/eventify/eventify_service/config/JwtAuthenticationFilter.java[m
+[1m+++ b/src/main/java/com/eventify/eventify_service/config/JwtAuthenticationFilter.java[m
+[36m@@ -29,6 +29,7 @@[m [mpublic class JwtAuthenticationFilter extends OncePerRequestFilter {[m
+                                     HttpServletResponse response,[m
+                                     FilterChain filterChain)[m
+             throws ServletException, IOException {[m
+[32m+[m[41m    [m	[32mSystem.out.println("JWT FILTER HIT: " + request.getServletPath());[m
+ [m
+         String authHeader = request.getHeader("Authorization");[m
+ [m
+[36m@@ -73,4 +74,7 @@[m [mpublic class JwtAuthenticationFilter extends OncePerRequestFilter {[m
+                 || path.startsWith("/js/")[m
+                 || path.startsWith("/images/");[m
+     }[m
+[32m+[m[41m    [m
+ }[m
+[32m+[m[32m//.addFilterBefore(jwtAuthenticationFilter,[m
+[32m+[m[32m//UsernamePasswordAuthenticationFilter.class);[m
+[1mdiff --git a/src/main/java/com/eventify/eventify_service/config/SecurityConfig.java b/src/main/java/com/eventify/eventify_service/config/SecurityConfig.java[m
+[1mindex ef104df..660767c 100644[m
+[1m--- a/src/main/java/com/eventify/eventify_service/config/SecurityConfig.java[m
+[1m+++ b/src/main/java/com/eventify/eventify_service/config/SecurityConfig.java[m
+[36m@@ -19,6 +19,7 @@[m [mpublic class SecurityConfig {[m
+     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {[m
+         this.jwtAuthenticationFilter = jwtAuthenticationFilter;[m
+     }[m
+[32m+[m[41m    [m
+ [m
+     @Bean[m
+     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {[m
+[36m@@ -34,25 +35,29 @@[m [mpublic class SecurityConfig {[m
+ [m
+             // 3️ Authorization rules[m
+             .authorizeHttpRequests(auth -> auth[m
+[31m-            		 .requestMatchers("/auth/**").permitAll()[m
+[31m-            	    // Public resources[m
+[32m+[m
+[32m+[m[41m            [m	[32m    // 🔥 Public endpoints[m
+[32m+[m[41m            [m	[32m    .requestMatchers("/auth/**").permitAll()[m
+[32m+[m
+             	    .requestMatchers([m
+[31m-            	            "/", [m
+[31m-            	            "/index.html", [m
+[31m-            	            "/css/**", [m
+[31m-            	            "/js/**", [m
+[31m-            	            "/login.html",[m
+[31m-            	            "/register.html",[m
+[31m-            	            "/images/**"[m
+[32m+[m[41m            [m	[32m        "/",[m[41m [m
+[32m+[m[41m            [m	[32m        "/index.html",[m[41m [m
+[32m+[m[41m            [m	[32m        "/css/**",[m[41m [m
+[32m+[m[41m            [m	[32m        "/js/**",[m[41m [m
+[32m+[m[41m            [m	[32m        "/login.html",[m
+[32m+[m[41m            [m	[32m        "/register.html",[m
+[32m+[m[41m            [m	[32m        "/images/**"[m
+             	    ).permitAll()[m
+[32m+[m
+[32m+[m[41m            [m	[32m    // 🔐 Protected[m
+             	    .requestMatchers("/users/**").hasRole("ADMIN")[m
+             	    .requestMatchers("/events/create").hasRole("ORGANIZER")[m
+             	    .requestMatchers("/events/**")[m
+             	        .hasAnyRole("ADMIN", "ORGANIZER", "PARTICIPANT")[m
+ [m
+[32m+[m[41m            [m	[32m    // 🔐 Everything else[m
+             	    .anyRequest().authenticated()[m
+[31m-            	[m
+[31m-            )[m
+[32m+[m[41m            [m	[32m)[m
+ [m
+             // 4️⃣ Disable default login forms[m
+             .formLogin(form -> form.disable())[m
+[36m@@ -69,4 +74,6 @@[m [mpublic class SecurityConfig {[m
+     public PasswordEncoder passwordEncoder() {[m
+         return new BCryptPasswordEncoder();[m
+     }[m
+[32m+[m[41m    [m
+ }[m
+[41m+[m
+[1mdiff --git a/src/main/java/com/eventify/eventify_service/controller/AuthController.java b/src/main/java/com/eventify/eventify_service/controller/AuthController.java[m
+[1mindex 3dea7df..c6bad6c 100644[m
+[1m--- a/src/main/java/com/eventify/eventify_service/controller/AuthController.java[m
+[1m+++ b/src/main/java/com/eventify/eventify_service/controller/AuthController.java[m
+[36m@@ -57,8 +57,9 @@[m [mpublic class AuthController {[m
+         }[m
+ [m
+         userRepository.save(user);[m
+[31m-[m
+[32m+[m[32m        System.out.println("REGISTER API HIT");[m
+         return "User registered successfully";[m
+[32m+[m[41m        [m
+     }[m
+ [m
+ [m
+[1mdiff --git a/src/main/java/com/eventify/eventify_service/controller/UserController.java b/src/main/java/com/eventify/eventify_service/controller/UserController.java[m
+[1mindex c1266ca..bc6c2b9 100644[m
+[1m--- a/src/main/java/com/eventify/eventify_service/controller/UserController.java[m
+[1m+++ b/src/main/java/com/eventify/eventify_service/controller/UserController.java[m
+[36m@@ -5,11 +5,11 @@[m [mimport org.springframework.beans.factory.annotation.Autowired;[m
+ import org.springframework.web.bind.annotation.*;[m
+ [m
+ import com.eventify.eventify_service.dto.UserDTORequest;[m
+[32m+[m[32mimport com.eventify.eventify_service.dto.UserDTOResponse;[m
+ import com.eventify.eventify_service.model.User;[m
+ import com.eventify.eventify_service.service.UserService;[m
+ [m
+ import jakarta.validation.Valid;[m
+[31m-[m
+ @RestController[m
+ @RequestMapping("/users")[m
+ public class UserController {[m
+[36m@@ -17,20 +17,25 @@[m [mpublic class UserController {[m
+     @Autowired[m
+     private UserService userService;[m
+ [m
+[32m+[m[32m    // 🔥 CREATE (should use DTO ideally — we’ll improve next)[m
+     @PostMapping[m
+     public User create(@RequestBody User user) {[m
+         return userService.createUser(user);[m
+     }[m
+ [m
+[32m+[m[32m    // 🔥 GET ALL[m
+     @GetMapping[m
+[31m-    public List<User> getAll() {[m
+[32m+[m[32m    public List<UserDTOResponse> getAll() {[m
+         return userService.getAllUsers();[m
+     }[m
+ [m
+[32m+[m[32m    // 🔥 GET BY ID[m
+     @GetMapping("/{id}")[m
+[31m-    public User getById(@PathVariable String id) {[m
+[32m+[m[32m    public UserDTOResponse getById(@PathVariable String id) {[m
+         return userService.getUserById(id);[m
+     }[m
+[32m+[m
+[32m+[m[32m    // 🔥 UPDATE[m
+     @PutMapping("/{id}")[m
+     public User update(@PathVariable String id,[m
+                        @Valid @RequestBody UserDTORequest dto) {[m
+[36m@@ -38,10 +43,10 @@[m [mpublic class UserController {[m
+         return userService.updateUser(id, dto);[m
+     }[m
+ [m
+[32m+[m[32m    // 🔥 DELETE[m
+     @DeleteMapping("/{id}")[m
+     public String delete(@PathVariable String id) {[m
+         userService.deleteUser(id);[m
+         return "User deleted successfully";[m
+     }[m
+[31m-}[m
+[31m-[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/src/main/java/com/eventify/eventify_service/service/UserService.java b/src/main/java/com/eventify/eventify_service/service/UserService.java[m
+[1mindex d7e45f1..3e75c3c 100644[m
+[1m--- a/src/main/java/com/eventify/eventify_service/service/UserService.java[m
+[1m+++ b/src/main/java/com/eventify/eventify_service/service/UserService.java[m
+[36m@@ -4,7 +4,7 @@[m [mimport java.util.List;[m
+ import org.springframework.beans.factory.annotation.Autowired;[m
+ import org.springframework.security.crypto.password.PasswordEncoder;[m
+ import org.springframework.stereotype.Service;[m
+[31m-[m
+[32m+[m[32mimport com.eventify.eventify_service.dto.UserDTOResponse;[m
+ import com.eventify.eventify_service.dto.UserDTORequest;[m
+ import com.eventify.eventify_service.model.Role;[m
+ import com.eventify.eventify_service.model.User;[m
+[36m@@ -19,13 +19,18 @@[m [mpublic class UserService {[m
+         return userRepository.save(user);[m
+     }[m
+ [m
+[31m-    public List<User> getAllUsers() {[m
+[31m-        return userRepository.findAll();[m
+[32m+[m[32m    public List<UserDTOResponse> getAllUsers() {[m
+[32m+[m[32m        return userRepository.findAll()[m
+[32m+[m[32m                .stream()[m
+[32m+[m[32m                .map(this::mapToDTO)[m
+[32m+[m[32m                .toList();[m
+     }[m
+ [m
+[31m-    public User getUserById(String id) {[m
+[31m-        return userRepository.findById(id)[m
+[32m+[m[32m    public UserDTOResponse getUserById(String id) {[m
+[32m+[m[32m        User user = userRepository.findById(id)[m
+                 .orElseThrow(() -> new RuntimeException("User not found"));[m
+[32m+[m
+[32m+[m[32m        return mapToDTO(user);[m
+     }[m
+     private final PasswordEncoder passwordEncoder;[m
+ [m
+[36m@@ -36,20 +41,19 @@[m [mpublic class UserService {[m
+     }[m
+ [m
+     public User updateUser(String id, UserDTORequest dto) {[m
+[31m-    	User existingUser = getUserById(id);[m
+[32m+[m[32m        User existingUser = getUserEntityById(id);[m
+ [m
+         existingUser.setName(dto.getName());[m
+         existingUser.setEmail(dto.getEmail());[m
+[31m-[m
+[31m-        // Role conversion (IMPORTANT)[m
+         existingUser.setRole(Role.valueOf(dto.getRole().toUpperCase()));[m
+[31m-[m
+[31m-        // Encode password[m
+         existingUser.setPassword(passwordEncoder.encode(dto.getPassword()));[m
+ [m
+         return userRepository.save(existingUser);[m
+     }[m
+[31m-[m
+[32m+[m[32m    private User getUserEntityById(String id) {[m
+[32m+[m[32m        return userRepository.findById(id)[m
+[32m+[m[32m                .orElseThrow(() -> new RuntimeException("User not found"));[m
+[32m+[m[32m    }[m
+     public void deleteUser(String id) {[m
+         userRepository.deleteById(id);[m
+     }[m
+[36m@@ -57,5 +61,13 @@[m [mpublic class UserService {[m
+         return userRepository.findByEmail(email)[m
+                 .orElseThrow(() -> new RuntimeException("User not found"));[m
+     }[m
+[32m+[m[32m    private UserDTOResponse mapToDTO(User user) {[m
+[32m+[m[32m        UserDTOResponse dto = new UserDTOResponse();[m
+[32m+[m[32m        dto.setId(user.getId());[m
+[32m+[m[32m        dto.setName(user.getName());[m
+[32m+[m[32m        dto.setEmail(user.getEmail());[m
+[32m+[m[32m        dto.setRole(user.getRole().name());[m
+[32m+[m[32m        return dto;[m
+[32m+[m[32m    }[m
+ [m
+ }[m

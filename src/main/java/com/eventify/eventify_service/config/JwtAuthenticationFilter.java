@@ -29,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+    	System.out.println("JWT FILTER HIT: " + request.getServletPath());
 
         String authHeader = request.getHeader("Authorization");
 
@@ -73,4 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.startsWith("/js/")
                 || path.startsWith("/images/");
     }
+    
 }
+//.addFilterBefore(jwtAuthenticationFilter,
+//UsernamePasswordAuthenticationFilter.class);

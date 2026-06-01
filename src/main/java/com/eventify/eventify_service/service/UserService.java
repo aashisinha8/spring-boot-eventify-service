@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import com.eventify.eventify_service.dto.UserDTOResponse;
 import com.eventify.eventify_service.dto.UserDTORequest;
 import com.eventify.eventify_service.model.Role;
 import com.eventify.eventify_service.model.User;
@@ -19,13 +19,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTOResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
-    public User getUserById(String id) {
-        return userRepository.findById(id)
+    public UserDTOResponse getUserById(String id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return mapToDTO(user);
     }
     private final PasswordEncoder passwordEncoder;
 
@@ -36,26 +41,33 @@ public class UserService {
     }
 
     public User updateUser(String id, UserDTORequest dto) {
-    	User existingUser = getUserById(id);
+        User existingUser = getUserEntityById(id);
 
         existingUser.setName(dto.getName());
         existingUser.setEmail(dto.getEmail());
-
-        // Role conversion (IMPORTANT)
         existingUser.setRole(Role.valueOf(dto.getRole().toUpperCase()));
-
-        // Encode password
         existingUser.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         return userRepository.save(existingUser);
     }
-
+    private User getUserEntityById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }
     public User getByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    private UserDTOResponse mapToDTO(User user) {
+        UserDTOResponse dto = new UserDTOResponse();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole().name());
+        return dto;
     }
 
 }

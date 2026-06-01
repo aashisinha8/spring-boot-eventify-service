@@ -57,8 +57,9 @@ public class AuthController {
         }
 
         userRepository.save(user);
-
+        System.out.println("REGISTER API HIT");
         return "User registered successfully";
+        
     }
 
 

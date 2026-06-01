@@ -19,6 +19,7 @@ public class SecurityConfig {
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
+    
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,25 +35,29 @@ public class SecurityConfig {
 
             // 3️ Authorization rules
             .authorizeHttpRequests(auth -> auth
-            		 .requestMatchers("/auth/**").permitAll()
-            	    // Public resources
+
+            	    // 🔥 Public endpoints
+            	    .requestMatchers("/auth/**").permitAll()
+
             	    .requestMatchers(
-            	            "/", 
-            	            "/index.html", 
-            	            "/css/**", 
-            	            "/js/**", 
-            	            "/login.html",
-            	            "/register.html",
-            	            "/images/**"
+            	        "/", 
+            	        "/index.html", 
+            	        "/css/**", 
+            	        "/js/**", 
+            	        "/login.html",
+            	        "/register.html",
+            	        "/images/**"
             	    ).permitAll()
+
+            	    // 🔐 Protected
             	    .requestMatchers("/users/**").hasRole("ADMIN")
             	    .requestMatchers("/events/create").hasRole("ORGANIZER")
             	    .requestMatchers("/events/**")
             	        .hasAnyRole("ADMIN", "ORGANIZER", "PARTICIPANT")
 
+            	    // 🔐 Everything else
             	    .anyRequest().authenticated()
-            	
-            )
+            	)
 
             // 4️⃣ Disable default login forms
             .formLogin(form -> form.disable())
@@ -69,4 +74,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
 }
+
