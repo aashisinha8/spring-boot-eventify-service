@@ -53,7 +53,7 @@ public class AuthController {
 
         // Default role if not provided
         if (user.getRole() == null) {
-            user.setRole(Role.PARTICIPANT);
+            user.setRole(Role.ORGANIZER);
         }
 
         userRepository.save(user);

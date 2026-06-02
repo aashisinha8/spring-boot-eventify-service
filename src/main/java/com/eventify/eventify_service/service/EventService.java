@@ -3,18 +3,29 @@ package com.eventify.eventify_service.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.eventify.eventify_service.model.Event;
+import com.eventify.eventify_service.notification.NotificationService;
 import com.eventify.eventify_service.repository.EventRepository;
 
 import java.util.List;
 
 @Service
 public class EventService {
+	@Autowired
+	private NotificationService notificationService;
 
     @Autowired
     private EventRepository eventRepository;
 
     public Event createEvent(Event event) {
-        return eventRepository.save(event);
+
+        Event savedEvent = eventRepository.save(event);
+
+        notificationService.createNotification(
+                event.getOrganizerId(),
+                "Event created successfully"
+        );
+
+        return savedEvent;
     }
 
     public List<Event> getAllEvents() {
