@@ -1,121 +1,102 @@
-# Eventify – Role-Based Event Management Backend
-
-A production-style backend service built with Java and Spring Boot for managing events and users with secure, role-based access control.
-
----
+# Eventify - Smart Event Management System
 
 ## Overview
 
-Eventify is a RESTful backend system that supports three user roles — **ADMIN**, **ORGANIZER**, and **PARTICIPANT** — each with distinct permissions across user and event management workflows. Built to demonstrate clean layered architecture, JWT-based security, and document-based persistence with MongoDB.
+Eventify is a Spring Boot based event management platform that enables organizers to create and manage events while participants can register and receive notifications.
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | Java 17 |
-| Framework | Spring Boot |
-| Security | Spring Security, JWT |
-| Database | MongoDB (Spring Data) |
-| Build Tool | Maven |
-| API Testing | Postman |
+The application uses JWT-based authentication, MongoDB for persistence, Docker for containerization, and Apache Kafka for asynchronous event-driven notifications.
 
 ---
 
 ## Features
 
-- JWT-based stateless authentication
-- Role-based access control (ADMIN / ORGANIZER / PARTICIPANT)
-- Full event lifecycle management (create, update, delete, view)
-- User registration and login
-- Centralized exception handling with meaningful HTTP status codes
-- Input validation on all endpoints
-- Structured layered architecture: Controller → Service → Repository
+### Authentication & Authorization
+
+* User Registration
+* User Login
+* JWT Authentication
+* Role-Based Access Control
+
+  * ADMIN
+  * ORGANIZER
+  * PARTICIPANT
+
+### Event Management
+
+* Create Event
+* View Events
+* Delete Events
+* Organizer-specific Event Management
+
+### Notification System
+
+* Kafka-based Event Notifications
+* Asynchronous Event Processing
+* User-specific Notifications
+* Mark Notifications as Read
+
+### Infrastructure
+
+* MongoDB
+* Docker
+* Apache Kafka
+* Zookeeper
 
 ---
 
-## Project Structure
-src/
-├── controller/       # REST API endpoints
-├── service/          # Business logic
-├── repository/       # MongoDB data access
-├── model/            # Domain entities (User, Event)
-├── security/         # JWT filter, security config
-├── dto/              # Request/response objects
-└── exception/        # Global exception handler
+## Tech Stack
+
+* Java 17
+* Spring Boot
+* Spring Security
+* JWT
+* MongoDB
+* Apache Kafka
+* Docker
+* Maven
 
 ---
 
-## Getting Started
+## Event-Driven Notification Flow
 
-### Prerequisites
-- Java 17+
-- MongoDB running locally on port `27017`
-- Maven 3.8+
-
-### Run Locally
-
-```bash
-# Clone the repository
-git clone https://github.com/aashisinha8/spring-boot-eventify-service.git
-cd spring-boot-eventify-service
-
-# Start the application
-./mvnw spring-boot:run
-```
-
-The service starts on `http://localhost:8080`
+Event Created
+→ Kafka Producer
+→ event-created Topic
+→ Kafka Consumer
+→ Notification Service
+→ MongoDB Notifications Collection
 
 ---
 
-## API Reference
+## APIs
 
-### Auth
+### Authentication
 
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| POST | `/users` | Public | Register a new user |
-| POST | `/auth/login` | Public | Login and receive JWT token |
+POST /auth/register
+
+POST /auth/login
 
 ### Events
 
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| POST | `/events` | ADMIN, ORGANIZER | Create a new event |
-| GET | `/events` | ALL | View all events |
-| PUT | `/events/{id}` | ADMIN, ORGANIZER | Update an event |
-| DELETE | `/events/{id}` | ADMIN | Delete an event |
+POST /events
 
-### Admin
+GET /events
 
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| GET | `/users` | ADMIN | View all users |
-| DELETE | `/users/{id}` | ADMIN | Remove a user |
+DELETE /events/{id}
 
-### Health
+### Notifications
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/health` | Service health check |
+GET /notifications/{userId}
+
+PUT /notifications/{notificationId}/read
 
 ---
 
-## Security Model
+## Future Enhancements
 
-Authentication uses **JWT tokens** passed as Bearer tokens in the `Authorization` header.
-
-Authorization: Bearer <your_token>
-
-Role permissions are enforced at the endpoint level via Spring Security's filter chain:
-
-- **ADMIN** – full access across users and events
-- **ORGANIZER** – can create and manage their own events
-- **PARTICIPANT** – read-only access to events
-
----
-
-## Author
-**Aayushi Sinha**  
-[LinkedIn](https://linkedin.com/in/aayushi-sinha-171819180) | [GitHub](https://github.com/aashisinha8)
+* Participant Event Registration
+* Organizer Notification on Registration
+* Email Notifications
+* Microservice Architecture
+* Docker Compose for Full Deployment
+* Redis Caching
