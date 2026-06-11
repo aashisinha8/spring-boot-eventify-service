@@ -39,6 +39,8 @@ public class SecurityConfig {
             	    // 🔥 Public endpoints
             	    .requestMatchers("/auth/**").permitAll()
             	    .requestMatchers("/notifications/**").permitAll()
+            	    .requestMatchers("/registrations/**")
+            	    .permitAll()
             	    .requestMatchers(
             	        "/", 
             	        "/index.html", 
